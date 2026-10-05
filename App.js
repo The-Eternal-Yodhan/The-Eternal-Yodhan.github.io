@@ -1,3 +1,4 @@
+alert("yay");
 if (error) {
     errorMsg.innerText = error.message;
     errorMsg.style.display = 'block';
