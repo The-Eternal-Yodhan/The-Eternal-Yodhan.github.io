@@ -66,45 +66,58 @@
         // Direct clean library import using the verified browser CDN link
         import { createClient } from 'https://jsdelivr.net'
 
-        const SUPABASE_URL = 'https://supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Wait until all resources and library elements are fully parsed by the browser
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            const SUPABASE_URL = 'https://whrslkfvubmqzzwotncs.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
+            const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Grab DOM elements
-        const welcomeTitle = document.getElementById('welcome-title');
-        const userDetails = document.getElementById('user-details');
-        const actionArea = document.getElementById('action-area');
+            // Grab DOM elements
+            const welcomeTitle = document.getElementById('welcome-title');
+            const userDetails = document.getElementById('user-details');
+            const actionArea = document.getElementById('action-area');
 
-        // Ask Supabase if a user is currently logged in right now
-        async function checkUserSession() {
-            const { data: { user } } = await supabase.auth.getUser();
+            // Ask Supabase if a user is currently logged in right now
+            async function checkUserSession() {
+                try {
+                    const { data: { user }, error } = await supabase.auth.getUser();
 
-            if (user) {
-                // User IS logged in!
-                welcomeTitle.innerText = "Welcome back!";
-                userDetails.innerText = `You are securely logged in as: ${user.email}`;
-                
-                // Inject a logout button
-                actionArea.innerHTML = `<button id="logout-btn" class="btn logout-btn">Log Out</button>`;
-                
-                // Attach functional logout trigger
-                document.getElementById('logout-btn').addEventListener('click', async () => {
-                    await supabase.auth.signOut();
-                    alert("Logged out successfully!");
-                    window.location.reload(); // Refresh to update screen state
-                });
-            } else {
-                // User is NOT logged in
-                welcomeTitle.innerText = "Welcome Guest";
-                userDetails.innerText = "Please log in to access your dashboard settings.";
-                
-                // Inject a link to your login page (log.html)
-                actionArea.innerHTML = `<a href="log.html" class="btn">Go to Login Page</a>`;
+                    if (error) throw error;
+
+                    if (user) {
+                        // User IS logged in!
+                        welcomeTitle.innerText = "Welcome back!";
+                        userDetails.innerText = `You are securely logged in as: ${user.email}`;
+                        
+                        // Inject a logout button
+                        actionArea.innerHTML = `<button id="logout-btn" class="btn logout-btn">Log Out</button>`;
+                        
+                        // Attach functional logout trigger
+                        document.getElementById('logout-btn').addEventListener('click', async () => {
+                            await supabase.auth.signOut();
+                            alert("Logged out successfully!");
+                            window.location.reload(); // Refresh to update screen state
+                        });
+                    } else {
+                        // User is NOT logged in
+                        welcomeTitle.innerText = "Welcome Guest";
+                        userDetails.innerText = "Please log in to access your dashboard settings.";
+                        
+                        // Inject a link to your login page (log.html)
+                        actionArea.innerHTML = `<a href="log.html" class="btn">Go to Login Page</a>`;
+                    }
+                } catch (e) {
+                    // Fail-safe handling for network drops or empty states
+                    welcomeTitle.innerText = "Welcome Guest";
+                    userDetails.innerText = "Please log in to access your dashboard settings.";
+                    actionArea.innerHTML = `<a href="log.html" class="btn">Go to Login Page</a>`;
+                }
             }
-        }
 
-        // Run the script instantly on window load
-        checkUserSession();
+            // Execute session query loop
+            checkUserSession();
+        });
     </script>
 </body>
 </html>
