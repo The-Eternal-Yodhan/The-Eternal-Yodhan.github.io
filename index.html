@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>The Eternal Yodhan</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1>This is just a test.</h1>
-        <p>Hi, It's me, It's TheYodhanGuy (Your sitemaster) and this is my website.</p>
-        <a href="/sign-up">Sign Up</a>
-        <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-    window.addEventListener('DOMContentLoaded', async () => {
-        const SUPABASE_URL = 'https://whrslkfvubmqzzwotncs.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
-        
-        // Initialize Supabase with session persistence
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: { persistSession: true }
+<head>
+    <title>The Eternal Yodhan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>This is just a test.</h1>
+    <p>Hi, It's me, It's TheYodhanGuy (Your sitemaster) and this is my website.</p>
+    <a href="/sign-up">Sign Up</a>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const SUPABASE_URL = 'https://whrslkfvubmqzzwotncs.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
+
+            // Initialize Supabase with session persistence
+            const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { persistSession: true }
+            });
+
+            // Ask Supabase if there is a saved login session
+            const { data: { user }, error } = await supabase.auth.getUser();
+
+            if (user) {
+                // They are logged in! 
+                console.log("Logged in successfully as:", user.email);
+                // You can update your HTML here to say "Welcome, user.email"
+            } else {
+                // Not logged in. Kick them back to the login page.
+                window.location.href = '/';
+            }
         });
+    </script>
+</body>
 
-        // Ask Supabase if there is a saved login session
-        const { data: { user }, error } = await supabase.auth.getUser();
-
-        if (user) {
-            // They are logged in! 
-            console.log("Logged in successfully as:", user.email);
-            // You can update your HTML here to say "Welcome, user.email"
-        } else {
-            // Not logged in. Kick them back to the login page.
-            window.location.href = 'log.html';
-        }
-    });
-</script>
-    </body>
 </html>
