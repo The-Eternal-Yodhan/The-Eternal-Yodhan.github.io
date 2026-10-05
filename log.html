@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Website Home</title>
     <style>
-        /* Your custom background rules */
         body {
             background-image: url("images/grass.png"), url("images/dirt.png");
             background-repeat: repeat-x, repeat;
@@ -14,109 +13,179 @@
             text-align: center;
         }
 
-        /* Your custom text color rule */
-        h1, h2, h3, h4, h5, h6, p {
+        h1, h2, h3, h4, h5, h6, p, label {
             color: white;
         }
 
-        /* Semi-transparent dark card wrapper to keep your text readable over images */
         .container {
             background: rgba(36, 41, 46, 0.95);
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
+            max-width: 400px;
             margin: auto;
         }
-        
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #1e2227;
+            color: white;
+            box-sizing: border-box;
+        }
+
         .btn {
             display: inline-block;
+            width: 100%;
             padding: 10px 20px;
-            background-color: #10b981; /* Green accent color */
+            background-color: #10b981;
             color: white;
-            text-decoration: none;
             border-radius: 4px;
             font-weight: 600;
             border: none;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 10px;
         }
-        
+
+        .btn:hover {
+            background-color: #059669;
+        }
+
         .logout-btn {
             background-color: #ef4444;
         }
-        
+
         .logout-btn:hover {
             background-color: #dc2626;
+        }
+
+        #error-msg {
+            color: #f87171;
+            margin-top: 10px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- This header text changes based on login status -->
-        <h1 id="welcome-title">Checking your login status...</h1>
-        <p id="user-details"></p>
-        
-        <!-- This button area dynamically changes -->
-        <div id="action-area"></div>
+        <!-- Logged-in View -->
+        <div id="dashboard-view" style="display: none;">
+            <h1 id="welcome-title">Welcome back!</h1>
+            <p id="user-details"></p>
+            <button id="logout-btn" class="btn logout-btn">Log Out</button>
+        </div>
+
+        <!-- Login Form View -->
+        <div id="login-view" style="display: none;">
+            <h1>Log In</h1>
+            <p>Enter your account details to access your dashboard.</p>
+            
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="yourname@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="login-btn" class="btn">Log In</button>
+            </form>
+
+            <p id="error-msg"></p>
+        </div>
+
+        <!-- Loading View -->
+        <div id="loading-view">
+            <h1>Loading...</h1>
+        </div>
     </div>
 
     <script type="module">
-        // Direct clean library import using the verified browser CDN link
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-        // Wait until all resources and library elements are fully parsed by the browser
-        window.addEventListener('DOMContentLoaded', () => {
-            
+        window.addEventListener('DOMContentLoaded', async () => {
             const SUPABASE_URL = 'https://whrslkfvubmqzzwotncs.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
             const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            // Grab DOM elements
+            const dashboardView = document.getElementById('dashboard-view');
+            const loginView = document.getElementById('login-view');
+            const loadingView = document.getElementById('loading-view');
             const welcomeTitle = document.getElementById('welcome-title');
             const userDetails = document.getElementById('user-details');
-            const actionArea = document.getElementById('action-area');
+            const authForm = document.getElementById('auth-form');
+            const errorMsg = document.getElementById('error-msg');
+            const logoutBtn = document.getElementById('logout-btn');
 
-            // Ask Supabase if a user is currently logged in right now
-            async function checkUserSession() {
-                try {
-                    const { data: { user }, error } = await supabase.auth.getUser();
+            // Render view dynamically
+            function showView(view) {
+                loadingView.style.display = 'none';
+                loginView.style.display = 'none';
+                dashboardView.style.display = 'none';
 
-                    if (error) throw error;
+                if (view === 'dashboard') dashboardView.style.display = 'block';
+                if (view === 'login') loginView.style.display = 'block';
+                if (view === 'loading') loadingView.style.display = 'block';
+            }
 
-                    if (user) {
-                        // User IS logged in!
-                        welcomeTitle.innerText = "Welcome back!";
-                        userDetails.innerText = `You are securely logged in as: ${user.email}`;
-                        
-                        // Inject a logout button
-                        actionArea.innerHTML = `<button id="logout-btn" class="btn logout-btn">Log Out</button>`;
-                        
-                        // Attach functional logout trigger
-                        document.getElementById('logout-btn').addEventListener('click', async () => {
-                            await supabase.auth.signOut();
-                            alert("Logged out successfully!");
-                            window.location.reload(); // Refresh to update screen state
-                        });
-                    } else {
-                        // User is NOT logged in
-                        welcomeTitle.innerText = "Welcome Guest";
-                        userDetails.innerText = "Please log in to access your dashboard settings.";
-                        
-                        // Inject a link to your login page (log.html)
-                        actionArea.innerHTML = `<a href="log.html" class="btn">Go to Login Page</a>`;
-                    }
-                } catch (e) {
-                    // Fail-safe handling for network drops or empty states
-                    welcomeTitle.innerText = "Welcome Guest";
-                    userDetails.innerText = "Please log in to access your dashboard settings.";
-                    actionArea.innerHTML = `<a href="log.html" class="btn">Go to Login Page</a>`;
+            // Check if user is already logged in
+            async function checkSession() {
+                const { data: { user } } = await supabase.auth.getUser();
+
+                if (user) {
+                    welcomeTitle.innerText = "Welcome back!";
+                    userDetails.innerText = `Logged in as: ${user.email}`;
+                    showView('dashboard');
+                } else {
+                    showView('login');
                 }
             }
 
-            // Execute session query loop
-            checkUserSession();
+            // Handle Login Form Submission
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorMsg.innerText = '';
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    errorMsg.innerText = error.message;
+                } else {
+                    welcomeTitle.innerText = "Welcome back!";
+                    userDetails.innerText = `Logged in as: ${data.user.email}`;
+                    showView('dashboard');
+                }
+            });
+
+            // Handle Logout
+            logoutBtn.addEventListener('click', async () => {
+                await supabase.auth.signOut();
+                showView('login');
+            });
+
+            // Run initial check
+            checkSession();
         });
     </script>
 </body>
