@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In</title>
-    <!-- 1. This loads the Supabase background engine -->
-    <script src="https://jsdelivr.net"></script>
     
-    <!-- 2. Clean styling for your page -->
+    <!-- 1. The CDN Library to power Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 2. The Visual Styling for your layout -->
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background-color: #f3f4f6;
             display: flex;
             justify-content: center;
@@ -26,58 +27,29 @@
             width: 100%;
             max-width: 360px;
         }
-        h2 {
-            margin-top: 0;
-            color: #111827;
-            text-align: center;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #374151;
-            font-size: 14px;
-        }
+        h2 { margin-top: 0; color: #111827; text-align: center; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; color: #374151; font-size: 14px; }
         input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        input:focus {
-            outline: none;
-            border-color: #3b82f6;
+            width: 100%; padding: 10px; border: 1px solid #d1d5db;
+            border-radius: 4px; box-sizing: border-box; font-size: 16px;
         }
         button {
-            width: 100%;
-            padding: 12px;
-            background-color: #24292e;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 600;
+            width: 100%; padding: 12px; background-color: #24292e;
+            color: white; border: none; border-radius: 4px;
+            font-size: 16px; cursor: pointer; font-weight: 600;
         }
-        button:hover {
-            background-color: #1a1e22;
-        }
+        button:disabled { background-color: #6b7280; }
         #error-msg {
-            color: #ef4444;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
+            color: #ef4444; font-size: 14px; margin-top: 12px;
+            text-align: center; display: none; background: #fee2e2;
+            padding: 8px; border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-    <!-- This is the actual form people will see on their screens -->
+    <!-- 3. The Visual Login Screen Content -->
     <div class="login-card">
         <h2>Welcome Back</h2>
         <form id="login-form">
@@ -94,8 +66,64 @@
         </form>
     </div>
 
-    <!-- 3. This runs your logic connecting the form to Supabase -->
-    <script src="app.js"></script>
+    <!-- 4. The Functional JavaScript Engine -->
+    <script>
+        // Use a strictly unique client name to prevent global library collisions
+        let globalSupabaseClient;
+
+        try {
+            // Safe CDN initiation utilizing the root window context
+            globalSupabaseClient = window.supabase.createClient(
+                'https://whrslkfvubmqzzwotncs.supabase.co', 
+                'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf'
+            );
+            console.log("Supabase safely initialized.");
+        } catch (initError) {
+            alert("Initialization Failed: Check internet connection or CDN URL link.");
+        }
+
+        // Grab elements safely from above
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorMsg = document.getElementById('error-msg');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Form logic wrapper
+        loginForm.addEventListener('submit', async (event) => {
+            // Absolute absolute stop to prevent browser screen reloads on form click
+            event.preventDefault(); 
+            
+            // Visual state feedback changes
+            submitBtn.innerText = 'Connecting...';
+            submitBtn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                // Execute auth request targeting Supabase identity servers
+                const response = await globalSupabaseClient.auth.signInWithPassword({
+                    email: emailInput.value,
+                    password: passwordInput.value,
+                });
+
+                // Read output results 
+                if (response.error) {
+                    errorMsg.innerText = response.error.message;
+                    errorMsg.style.display = 'block';
+                } else {
+                    alert('Success! Logging you in.');
+                    window.location.href = 'index.html'; // Direct route to home
+                }
+            } catch (runtimeError) {
+                errorMsg.innerText = "A connection error occurred. Check browser logs.";
+                errorMsg.style.display = 'block';
+                console.error(runtimeError);
+            }
+
+            // Restore button properties
+            submitBtn.innerText = 'Log In';
+            submitBtn.disabled = false;
+        });
+    </script>
 </body>
 </html>
-
