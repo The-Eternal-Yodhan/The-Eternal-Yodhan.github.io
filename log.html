@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website Home</title>
+    <title>Log In</title>
     <style>
         body {
             background-image: url("images/grass.png"), url("images/dirt.png");
@@ -13,7 +13,7 @@
             text-align: center;
         }
 
-        h1, h2, h3, h4, h5, h6, p, label {
+        h1, p, label {
             color: white;
         }
 
@@ -64,14 +64,6 @@
             background-color: #059669;
         }
 
-        .logout-btn {
-            background-color: #ef4444;
-        }
-
-        .logout-btn:hover {
-            background-color: #dc2626;
-        }
-
         #error-msg {
             color: #f87171;
             margin-top: 10px;
@@ -82,17 +74,15 @@
 <body>
 
     <div class="container">
-        <!-- Logged-in View -->
-        <div id="dashboard-view" style="display: none;">
-            <h1 id="welcome-title">Welcome back!</h1>
-            <p id="user-details"></p>
-            <button id="logout-btn" class="btn logout-btn">Log Out</button>
+        <!-- Loading View (prevents flashing the login screen if already logged in) -->
+        <div id="loading-view">
+            <h1>Authenticating...</h1>
         </div>
 
         <!-- Login Form View -->
         <div id="login-view" style="display: none;">
             <h1>Log In</h1>
-            <p>Enter your account details to access your dashboard.</p>
+            <p>Enter your account details to continue.</p>
             
             <form id="auth-form">
                 <div class="form-group">
@@ -108,11 +98,6 @@
 
             <p id="error-msg"></p>
         </div>
-
-        <!-- Loading View -->
-        <div id="loading-view">
-            <h1>Loading...</h1>
-        </div>
     </div>
 
     <script type="module">
@@ -123,70 +108,15 @@
             const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
             const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            const dashboardView = document.getElementById('dashboard-view');
             const loginView = document.getElementById('login-view');
             const loadingView = document.getElementById('loading-view');
-            const welcomeTitle = document.getElementById('welcome-title');
-            const userDetails = document.getElementById('user-details');
             const authForm = document.getElementById('auth-form');
             const errorMsg = document.getElementById('error-msg');
-            const logoutBtn = document.getElementById('logout-btn');
 
             // Render view dynamically
             function showView(view) {
                 loadingView.style.display = 'none';
                 loginView.style.display = 'none';
-                dashboardView.style.display = 'none';
 
-                if (view === 'dashboard') dashboardView.style.display = 'block';
                 if (view === 'login') loginView.style.display = 'block';
-                if (view === 'loading') loadingView.style.display = 'block';
-            }
-
-            // Check if user is already logged in
-            async function checkSession() {
-                const { data: { user } } = await supabase.auth.getUser();
-
-                if (user) {
-                    welcomeTitle.innerText = "Welcome back!";
-                    userDetails.innerText = `Logged in as: ${user.email}`;
-                    showView('dashboard');
-                } else {
-                    showView('login');
-                }
-            }
-
-            // Handle Login Form Submission
-            authForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                errorMsg.innerText = '';
-                
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
-
-                if (error) {
-                    errorMsg.innerText = error.message;
-                } else {
-                    welcomeTitle.innerText = "Welcome back!";
-                    userDetails.innerText = `Logged in as: ${data.user.email}`;
-                    showView('dashboard');
-                }
-            });
-
-            // Handle Logout
-            logoutBtn.addEventListener('click', async () => {
-                await supabase.auth.signOut();
-                showView('login');
-            });
-
-            // Run initial check
-            checkSession();
-        });
-    </script>
-</body>
-</html>
+                if (view === 'loading') loadingView.style.display = 'block
