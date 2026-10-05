@@ -74,13 +74,8 @@
 <body>
 
     <div class="container">
-        <!-- Loading View (prevents flashing the login screen if already logged in) -->
-        <div id="loading-view">
-            <h1>Authenticating...</h1>
-        </div>
-
-        <!-- Login Form View -->
-        <div id="login-view" style="display: none;">
+        <!-- Login Form View is now the only thing here, visible immediately -->
+        <div id="login-view">
             <h1>Log In</h1>
             <p>Enter your account details to continue.</p>
             
@@ -103,20 +98,42 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        window.addEventListener('DOMContentLoaded', () => {
             const SUPABASE_URL = 'https://whrslkfvubmqzzwotncs.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_eOO7o5ahzkX-wF3mh94ZvA_nV2-AEOf';
-            const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            // Initializing with session persistence turned on
+            const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { persistSession: true }
+            });
 
-            const loginView = document.getElementById('login-view');
-            const loadingView = document.getElementById('loading-view');
             const authForm = document.getElementById('auth-form');
             const errorMsg = document.getElementById('error-msg');
+            const loginBtn = document.getElementById('login-btn');
 
-            // Render view dynamically
-            function showView(view) {
-                loadingView.style.display = 'none';
-                loginView.style.display = 'none';
+            // Handle Login Form Submission
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorMsg.innerText = '';
+                loginBtn.innerText = 'Logging in...';
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-                if (view === 'login') loginView.style.display = 'block';
-                if (view === 'loading') loadingView.style.display = 'block
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    errorMsg.innerText = error.message;
+                    loginBtn.innerText = 'Log In'; // Reset button text on error
+                } else {
+                    // Success! Redirect to the main page immediately
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
