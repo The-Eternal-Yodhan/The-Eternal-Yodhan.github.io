@@ -1,5 +1,8 @@
 body {
-    background-image: url("/images/dirt.png");
+    background-image: url("/images/grass.png");
+    background-repeat: repeat-x;
+    background-image: ("/images/dirt.png");
+    background-repeat: repeat;
 }
 
 h1, h2, h3, h4, h5, h6, p {
