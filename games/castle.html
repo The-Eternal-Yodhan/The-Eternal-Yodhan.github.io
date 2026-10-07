@@ -3,20 +3,21 @@
 
 <head>
     <title>Defend your Castle</title>
-</head>
-<body>
+    <script src="ruffle-0.5.0-web-selfhosted/ruffle.js"></script>
     <script>
-        window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer = window.RufflePlayer || {};
 
     window.addEventListener("DOMContentLoaded", () => {
         let ruffle = window.RufflePlayer.newest();
         let player = ruffle.createPlayer();
-        let container = document.getElementById("container");
+        let container = document.getElementById("embed");
         container.appendChild(player);
         player.ruffle().load("flash/castle.swf");
     });
     </script>
-    <script src="ruffle-0.5.0-web-selfhosted/ruffle.js"></script>
+</head>
+<body>
+    <div id="embed"></div>
 </body>
 
 </html>
